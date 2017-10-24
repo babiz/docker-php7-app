@@ -1,0 +1,58 @@
+#!/usr/bin/env bash
+
+# Set environment variables for dev
+
+NETWORK_NAME=$(echo ${PWD##*/} | sed 's~[^[:alnum:]/]\+~~g' )_appnet
+CURRENT_DIRECTORY=$(pwd) #"/c/Users/DELL/code/docker-dev"
+echo "Command: ".$1;
+
+if [ $# -gt 0 ]; then
+    # Create a fresh Laravel application
+    if [ "$1" == "install" ]; then
+        shift 1
+        echo "Running: composer create-project laravel/laravel www"
+        docker run -it --rm \
+            -v $CURRENT_DIRECTORY:/opt \
+            -w /opt \
+            --network=$NETWORK_NAME \
+            babish/php \
+            composer create-project laravel/laravel www
+    # Install a predis package for redis
+    elif [ "$1" == "predis" ]; then
+        shift 1
+        echo "Running: composer require predis/predis"
+        docker run -it --rm \
+            -v $CURRENT_DIRECTORY:/opt \
+            -w /opt \
+            --network=$NETWORK_NAME \
+            babish/php \
+            composer require predis/predis
+    # If "composer" is used, pass-thru to "composer"
+    # inside a new container
+    elif [ "$1" == "composer" ]; then
+        shift 1
+        echo "Running: composer $@"
+        docker run -it --rm \
+            -v $CURRENT_DIRECTORY:/opt \
+            -w /opt \
+            --network=$NETWORK_NAME \
+            babish/php \
+            composer "$@"
+    #artisan commang
+    elif [ "$1" == "artisan" ]; then
+        shift 1
+        echo "Running: php artisan $@"
+        docker run -it --rm \
+            -v $CURRENT_DIRECTORY/www/:/opt \
+            -w /opt \
+            --network=$NETWORK_NAME \
+            babish/php \
+            php artisan "$@"
+
+    else
+        echo "Running: docker-compose $@";
+        docker-compose $@
+    fi
+else
+    docker-compose ps
+fi

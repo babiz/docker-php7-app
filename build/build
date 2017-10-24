@@ -1,0 +1,34 @@
+#!/usr/bin/env bash
+
+# Current Directory of build script
+DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
+
+
+if [ $# -eq 0 ]
+then
+    echo "ERROR: should have atleast 1 parameters"
+else
+    case "$1" in
+        nginx)
+            echo "BUILDING NGINX IMAGE"
+            cd $DIR/nginx
+            docker build -t babish/nginx:$2 -t babish/nginx:latest .
+            echo "PUSHING NGINX IMAGE"
+            docker push babish/nginx:$2
+            docker push babish/nginx:latest
+        ;;
+
+        php)
+            echo "BUILDING PHP IMAGE"
+             cd $DIR/php
+            docker build -t babish/php:$2 -t babish/php:latest .
+            echo "PUSHING PHP IMAGE"
+            docker push babish/php:$2
+            docker push babish/php:latest
+         ;;
+        *)
+         echo "More option coming soon. Don't be greedy"
+         ;;
+    esac
+fi
+
